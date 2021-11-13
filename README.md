@@ -28,9 +28,10 @@ The docker image will be tagged as `chainsafe/devops`.
 
 ## Unit Testing
 
-Unit testing can be performed by running the command:
+Unit testing can be performed by running the command :
 
 ```sh
 npm test
 ```
+
 
