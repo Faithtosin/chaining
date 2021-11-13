@@ -9,6 +9,11 @@ on:
 
 env:
   custom: 'env for all jobs'
+  service: 'chaining-dev-service'
+  cluster: 'chaining-dev-cluster'
+  container: 'chaining-dev-container'
+  ecr-repo: 'chaining-dev-ecr'
+  aws-region: 'us-east-1'
     
 name: Pull Request Merged pipeline
 
@@ -44,17 +49,42 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
+        aws-region: ${{ env.aws-region }} 
+    
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
 
     - name: Build, tag, and push image to Amazon ECR
+      id: build-image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: chaining-dev-ecr
-        IMAGE_TAG: latest
-        #IMAGE_TAG: ${{ github.sha }}
+        ECR_REPOSITORY: ${{ env.ecr-repo }}
+        IMAGE_TAG: ${{ github.sha }}
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:main
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:main
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+    
+    ##### Deploy
+    - name: Download task definition
+      run: |
+          aws ecs describe-task-definition --task-definition chaining-dev-task --query taskDefinition > task-definition.json
+    
+    - name: Fill in the new image ID in the Amazon ECS task definition
+      id: task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: task-definition.json
+        container-name: ${{ env.container }}
+        image: ${{ steps.build-image.outputs.image }}    
+    
+    - name: Deploy Amazon ECS task definition
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.task-def.outputs.task-definition }}
+        service: ${{ env.service }}
+        cluster: ${{ env.cluster }}
+        wait-for-service-stability: true
