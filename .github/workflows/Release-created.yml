@@ -7,6 +7,15 @@ on:
       - main
   workflow_dispatch:
 
+
+env:
+  custom: 'env for all jobs'
+  service: 'chaining-dev-service'
+  cluster: 'chaining-dev-cluster'
+  container: 'chaining-dev-container'
+  ecr-repo: 'chaining-dev-ecr'
+  aws-region: 'us-east-1'
+
 jobs:
   build:
     name: Build
