@@ -21,7 +21,8 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-   
+    outputs:
+      image: ${{ steps.build-image.outputs.image }}
     #if: github.event.pull_request.merged == true
     
     steps:
@@ -78,7 +79,7 @@ jobs:
       with:
         task-definition: task-definition.json
         container-name: ${{ env.container }}
-        image: ${{ jobs.build.steps.build-image.outputs.image }}    
+        image: ${{ needs.build.outputs.image }}    
     
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
