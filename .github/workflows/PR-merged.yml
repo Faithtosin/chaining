@@ -1,5 +1,5 @@
 
-
+name: Pull Request Merged pipeline
 on:
   pull_request:
     branches:
@@ -15,7 +15,7 @@ env:
   ecr-repo: 'chaining-dev-ecr'
   aws-region: 'us-east-1'
     
-name: Pull Request Merged pipeline
+
 
 jobs:
   build:
