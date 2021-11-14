@@ -23,8 +23,6 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    outputs:
-      image: ${{ steps.build-image.outputs.image }}
 
     
     steps:
@@ -68,22 +66,7 @@ jobs:
         echo "::set-output name=image::$DOCKER_IMAGE_NAME"
     
     
-    # ##### Deploy    
-    # - name: Fill in the new image ID in the Amazon ECS task definition
-    #   id: task-def
-    #   uses: aws-actions/amazon-ecs-render-task-definition@v1
-    #   with:
-    #     task-definition: task-definition.json
-    #     container-name: ${{ env.container }}
-    #     image: ${{ steps.build-image.outputs.image }}    
-    
-    # - name: Deploy Amazon ECS task definition
-    #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-    #   with:
-    #     task-definition: ${{ steps.task-def.outputs.task-definition }}
-    #     service: ${{ env.service }}
-    #     cluster: ${{ env.cluster }}
-    #     wait-for-service-stability: true
+
 
   deploy:
     name: Deploy
@@ -101,6 +84,21 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.aws-region }} 
     
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+    
+    - name: Get Amazon ECR URI
+      id: build-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: ${{ env.ecr-repo }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        #Set image tag names
+        DOCKER_IMAGE_NAME="$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+        echo "::set-output name=image::$DOCKER_IMAGE_NAME"
+
     ##### Deploy    
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
@@ -108,7 +106,7 @@ jobs:
       with:
         task-definition: task-definition.json
         container-name: ${{ env.container }}
-        image: ${{ needs.build.outputs.image }}    
+        image: ${{ steps.build-image.outputs.image }}    
 
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
