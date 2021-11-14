@@ -1,10 +1,13 @@
 
 name: Pull Request Merged pipeline
 on:
-  pull_request:
+  push:
     branches:
       - main
-    types: [closed]
+  # pull_request:
+  #   branches:
+  #     - main
+  #   types: [closed]
   workflow_dispatch:
 
 env:
@@ -25,7 +28,12 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-   
+
+    - name: Install Task
+      uses: arduino/setup-task@v1
+      with:
+        version: 2.6.1
+
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -44,11 +52,20 @@ jobs:
         ECR_REPOSITORY: ${{ env.ecr-repo }}
         IMAGE_TAG: ${{ github.sha }}
       run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:main
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:main
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+        #Set image tag names
+        DOCKER_IMAGE_NAME="$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+        NEW_DOCKER_IMAGE_NAME="$ECR_REGISTRY/$ECR_REPOSITORY:main"
+
+        #Build image
+        DOCKER_IMAGE_NAME=$DOCKER_IMAGE_NAME task docker:build
+
+        #Add main tag to docker image
+        DOCKER_IMAGE_NAME=$DOCKER_IMAGE_NAME NEW_DOCKER_IMAGE_NAME=$NEW_DOCKER_IMAGE_NAME task docker:tag
+
+        #Push docker images
+        PUSH_DOCKER_IMAGE_NAME=$DOCKER_IMAGE_NAME task docker:push
+        PUSH_DOCKER_IMAGE_NAME=$NEW_DOCKER_IMAGE_NAME task docker:push
+        echo "::set-output name=image::$DOCKER_IMAGE_NAME"
     
     
     ##### Deploy    
