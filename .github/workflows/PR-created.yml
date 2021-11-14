@@ -8,7 +8,7 @@ on:
 name: Pull Request created pipeline
 
 jobs:
-  build:
+  test:
     name: Unit Testing
     runs-on: ubuntu-latest
     strategy:
