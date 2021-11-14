@@ -44,7 +44,7 @@ jobs:
         ECR_REPOSITORY: ${{ env.ecr-repo }}
         IMAGE_TAG: ${{ github.ref_name}}
       run: |
-        echo $IMAGE_TAG
+        echo "Version=$IMAGE_TAG  Branch=${{ github.event.release.target_commitish }}"
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
