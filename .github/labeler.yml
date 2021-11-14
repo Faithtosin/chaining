@@ -1,9 +1,15 @@
 
+# Add 'repo' label to any root file changes
+repo:
+- '*'
 
 # Add 'team: backend' if in the PR are changes in files located in app/src folder 
-backend: app/src/**/*
-qa: app/tests/**/*
-docs: app/README.md
+backend: 
+- app/src/**/*
+qa: 
+- app/tests/**/*
+docs: 
+- app/README.md
 devops:  
 - app/Dockerfile 
 - app/Taskfile.yml
