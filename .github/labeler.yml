@@ -8,7 +8,7 @@ backend:
 - 'src/**/*'
 qa: 
 - 'tests/**/*'
-docs: 
+'team: docs': 
 - 'README.md'
 devops:  
 - 'Dockerfile' 
