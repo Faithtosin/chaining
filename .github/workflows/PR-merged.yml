@@ -1,5 +1,5 @@
 
-name: Pull Request Merged pipeline
+name: Main Branch pipeline
 on:
   push:
     branches:
@@ -115,3 +115,7 @@ jobs:
         service: ${{ env.service }}
         cluster: ${{ env.cluster }}
         wait-for-service-stability: true
+    - name: Ready
+      id: deployment-successful
+      run: |
+        echo "Changes visible at https://cloudacademydemo.com/"
