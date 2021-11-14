@@ -4,8 +4,6 @@ on:
       - main
   workflow_dispatch:
 
-env:
-  custom: 'env for all jobs'
     
 name: Pull Request created pipeline
 
@@ -16,7 +14,6 @@ jobs:
     strategy:
       matrix:
         node-version: [10.x, 12.x, 14.x, 15.x]
-    if: github.actor == 'Faithtosin'
 
     steps:
     - name: Checkout
