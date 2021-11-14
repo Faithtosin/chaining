@@ -5,11 +5,11 @@ repo:
 
 # Add 'team: backend' if in the PR are changes in files located in app/src folder 
 backend: 
-- app/src/**/*
+- 'src/**/*'
 qa: 
-- app/tests/**/*
+- 'tests/**/*'
 docs: 
-- app/README.md
+- 'README.md'
 devops:  
-- app/Dockerfile 
-- app/Taskfile.yml
+- 'Dockerfile' 
+- 'Taskfile.yml'
