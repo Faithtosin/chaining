@@ -31,8 +31,6 @@ jobs:
 
     - name: Install Task
       uses: arduino/setup-task@v1
-      with:
-        version: 2.x
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
