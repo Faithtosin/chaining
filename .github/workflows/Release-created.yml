@@ -3,8 +3,6 @@ name: Release pipeline
 on:
   release:
     types: [created]
-    branches-ignore:
-      - main
   workflow_dispatch:
 
 
@@ -18,13 +16,16 @@ env:
 jobs:
   build:
     name: Build
+    if: github.event.release.target_commitish != main
     runs-on: ubuntu-latest
-    #if: github.event.pull_request.merged == true
     
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-   
+
+    - name: Install Task
+      uses: arduino/setup-task@v1
+
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -44,6 +45,12 @@ jobs:
         IMAGE_TAG: ${{ github.ref_name}}
       run: |
         echo "Version=$IMAGE_TAG  Branch=${{ github.event.release.target_commitish }}"
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+        DOCKER_IMAGE_NAME="$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+        
+        #Build image
+        DOCKER_IMAGE_NAME=$DOCKER_IMAGE_NAME task docker:build
+
+        #Push docker images
+        PUSH_DOCKER_IMAGE_NAME=$DOCKER_IMAGE_NAME task docker:push
+
+        echo "::set-output name=image::$DOCKER_IMAGE_NAME"
