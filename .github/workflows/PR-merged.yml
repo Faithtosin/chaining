@@ -23,7 +23,9 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    #if: github.event.pull_request.merged == true
+    outputs:
+      image: ${{ steps.build-image.outputs.image }}
+
     
     steps:
     - name: Checkout
@@ -68,6 +70,39 @@ jobs:
         echo "::set-output name=image::$DOCKER_IMAGE_NAME"
     
     
+    # ##### Deploy    
+    # - name: Fill in the new image ID in the Amazon ECS task definition
+    #   id: task-def
+    #   uses: aws-actions/amazon-ecs-render-task-definition@v1
+    #   with:
+    #     task-definition: task-definition.json
+    #     container-name: ${{ env.container }}
+    #     image: ${{ steps.build-image.outputs.image }}    
+    
+    # - name: Deploy Amazon ECS task definition
+    #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+    #   with:
+    #     task-definition: ${{ steps.task-def.outputs.task-definition }}
+    #     service: ${{ env.service }}
+    #     cluster: ${{ env.cluster }}
+    #     wait-for-service-stability: true
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+   
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.aws-region }} 
+    
     ##### Deploy    
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
@@ -75,8 +110,8 @@ jobs:
       with:
         task-definition: task-definition.json
         container-name: ${{ env.container }}
-        image: ${{ steps.build-image.outputs.image }}    
-    
+        image: ${{ needs.build.outputs.image }}    
+
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
