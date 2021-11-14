@@ -1,12 +1,18 @@
 
 
-# Add 'team: backend' if in the PR are changes in files located in app/src folder 
-team:backend: app/src/**/*
+# Adding 'team: backend' if in the PR there are changes in files located in app/src folder 
+'team: backend': 
+- 'src/**/*'
 
-team:qa: app/tests/**/*
+# Adding 'team: qa' if in the PR there are changes in files located in app/tests folder 
+'team: qa': 
+- 'tests/**/*'
 
-team:docs: app/README.md
+# Adding 'team: qa' if in the PR there are changes to the README.md file
+'team: docs': 
+- 'README.md'
 
-team:devops:  
-- app/Dockerfile 
-- app/Taskfile.yml
+# Adding 'team: devops' if in the PR there are changes to the devops file
+'team: devops':  
+- 'Dockerfile' 
+- 'Taskfile.yml'

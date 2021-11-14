@@ -9,7 +9,6 @@ on:
 
 
 env:
-  custom: 'env for all jobs'
   service: 'chaining-dev-service'
   cluster: 'chaining-dev-cluster'
   container: 'chaining-dev-container'
