@@ -4,18 +4,9 @@ on:
   push:
     branches:
       - main
-  # pull_request:
-  #   branches:
-  #     - main
-  #   types: [closed]
+
   workflow_dispatch:
 
-env:
-  service: 'chaining-dev-service'
-  cluster: 'chaining-dev-cluster'
-  container: 'chaining-dev-container'
-  ecr-repo: 'chaining-dev-ecr'
-  aws-region: 'us-east-1'
     
 
 
@@ -37,7 +28,7 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.aws-region }} 
+        aws-region: ${{ secrets.AWS_REGION }} 
     
     - name: Login to Amazon ECR
       id: login-ecr
@@ -47,7 +38,7 @@ jobs:
       id: build-image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: ${{ env.ecr-repo }}
+        ECR_REPOSITORY: ${{ secrets.ECR_REPO }}
         IMAGE_TAG: ${{ github.sha }}
       run: |
         #Set image tag names
@@ -82,7 +73,7 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.aws-region }} 
+        aws-region: ${{ secrets.AWS_REGION }} 
     
     - name: Login to Amazon ECR
       id: login-ecr
@@ -92,7 +83,7 @@ jobs:
       id: build-image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: ${{ env.ecr-repo }}
+        ECR_REPOSITORY: ${{ secrets.ECR_REPO }}
         IMAGE_TAG: ${{ github.sha }}
       run: |
         #Set image tag names
@@ -105,15 +96,15 @@ jobs:
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: task-definition.json
-        container-name: ${{ env.container }}
+        container-name: ${{ secrets.ECS_CONTAINER }}
         image: ${{ steps.build-image.outputs.image }}    
 
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.task-def.outputs.task-definition }}
-        service: ${{ env.service }}
-        cluster: ${{ env.cluster }}
+        service: ${{ secrets.ECS_SERVICE }}
+        cluster: ${{ secrets.ECS_CLUSTER }}
         wait-for-service-stability: true
     - name: Ready
       id: deployment-successful
