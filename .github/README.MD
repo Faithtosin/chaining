@@ -12,6 +12,9 @@ The branch is checked out, and unit test is run on 4 different versions of Node 
 
 Branch protection rules is configured for the `main` branch, to make sure some required status checks pass before merging. These checks include Sonarcloud checks, and Unit test run in the `Pull Request created pipeline` for the 4 Node versions. 
 
+
+
+
 ##
 ### Main Branch pipeline (`PR-merged.yml`)
 #### build job:
